@@ -150,9 +150,9 @@ extension SwiftDoc {
         }
 
         if case .html = format {
-          let cssData = try fetchRemoteCSS()
-          let cssURL = outputDirectoryURL.appendingPathComponent("all.css")
-          try writeFile(cssData, to: cssURL)
+            let cssData = css.data(using: .utf8)!
+            let cssURL = outputDirectoryURL.appendingPathComponent("all.css")
+            try writeFile(cssData, to: cssURL)
         }
 
       } catch {
@@ -160,9 +160,4 @@ extension SwiftDoc {
       }
     }
   }
-}
-
-func fetchRemoteCSS() throws -> Data {
-  let url = URL(string: "https://raw.githubusercontent.com/SwiftDocOrg/swift-doc/master/Resources/all.min.css")!
-  return try Data(contentsOf: url)
 }
