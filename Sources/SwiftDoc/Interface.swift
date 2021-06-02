@@ -79,7 +79,7 @@ public final class Interface {
                     for name in inheritedTypeNames {
                         let inheritedTypes = symbolsGroupedByIdentifier.named(name, resolvingTypealiases: true).filter({ ($0.api is Class || $0.api is Protocol) && $0.id.description == name })
                         if inheritedTypes.isEmpty {
-                            let inherited = Symbol(api: Unknown(name: name), context: [], declaration: [], documentation: nil, sourceRange: nil)
+                            let inherited = Symbol(api: Unknown(name: name), context: [], declaration: [], documentation: nil, sourceRange: nil, path: "NO PATH FOUND")
                             relationships.insert(Relationship(subject: symbol, predicate: .conformsTo, object: inherited))
                         } else {
                             for inherited in inheritedTypes {

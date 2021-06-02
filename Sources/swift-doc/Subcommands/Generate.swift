@@ -47,6 +47,11 @@ extension SwiftDoc {
     var options: Options
 
     func run() throws {
+        guard options.inputs.count == 1 else {
+            logger.error("Stream fork only allows 1 input directory")
+            return
+        }
+        
       for directory in options.inputs {
         var isDirectory: ObjCBool = false
         if !FileManager.default.fileExists(atPath: directory, isDirectory: &isDirectory) {
@@ -55,7 +60,10 @@ extension SwiftDoc {
           logger.warning("Input path \(directory) is not a directory.")
         }
       }
-
+        
+        let startDirectory = URL(fileURLWithPath: options.inputs.first!, isDirectory: true)
+        //print("START DIR \(startDirectory)")
+        //print("START DIR ABS \(startDirectory.absoluteString)")
       let module = try Module(name: options.moduleName, paths: options.inputs)
       let baseURL = options.baseURL
 
@@ -65,20 +73,20 @@ extension SwiftDoc {
       do {
         let format = options.format
 
-        var pages: [String: Page] = [:]
+        var pages: [String: (Page, Symbol?)] = [:]
 
         var globals: [String: [Symbol]] = [:]
         let symbolFilter = options.minimumAccessLevel.includes(symbol:)
         for symbol in module.interface.topLevelSymbols.filter(symbolFilter) {
           switch symbol.api {
           case is Class, is Enumeration, is Structure, is Protocol:
-            pages[route(for: symbol)] = TypePage(module: module, symbol: symbol, baseURL: baseURL, includingChildren: symbolFilter)
+            pages[route(for: symbol)] = (TypePage(module: module, symbol: symbol, baseURL: baseURL, includingChildren: symbolFilter), symbol)
           case let `typealias` as Typealias:
-            pages[route(for: `typealias`.name)] = TypealiasPage(module: module, symbol: symbol, baseURL: baseURL, includingOtherSymbols: symbolFilter)
+            pages[route(for: `typealias`.name)] = (TypealiasPage(module: module, symbol: symbol, baseURL: baseURL, includingOtherSymbols: symbolFilter), symbol)
           case is Operator:
             let operatorPage = OperatorPage(module: module, symbol: symbol, baseURL: baseURL, includingImplementations: symbolFilter)
             if !operatorPage.implementations.isEmpty {
-              pages[route(for: symbol)] = operatorPage
+              pages[route(for: symbol)] = (operatorPage, symbol)
             }
           case let function as Function where !function.isOperator:
             globals[function.name, default: []] += [symbol]
@@ -97,11 +105,15 @@ extension SwiftDoc {
           symbolsByExternalType[extensionDeclaration.extendedType, default: []] += [symbol]
         }
         for (typeName, symbols) in symbolsByExternalType {
-          pages[route(for: typeName)] = ExternalTypePage(module: module, externalType: typeName, symbols: symbols, baseURL: baseURL, includingOtherSymbols: symbolFilter)
+            let firstSymbol = symbols.first!
+            //print("EXTERNAL TYPE \(typeName), SYMBOL COUNT \(symbols.count), FIRST SYMBOL PATH \(firstSymbol.filePath)")
+            pages[route(for: typeName)] = (ExternalTypePage(module: module, externalType: typeName, symbols: symbols, baseURL: baseURL, includingOtherSymbols: symbolFilter), firstSymbol)
         }
 
         for (name, symbols) in globals {
-            pages[route(for: name)] = GlobalPage(module: module, name: name, symbols: symbols, baseURL: baseURL, includingOtherSymbols: symbolFilter)
+            let firstSymbol = symbols.first!
+            //print("GLOBAL PAGE \(name), SYMBOL COUNT \(symbols.count), FIRST SYMBOL PATH \(firstSymbol.filePath)")
+            pages[route(for: name)] = (GlobalPage(module: module, name: name, symbols: symbols, baseURL: baseURL, includingOtherSymbols: symbolFilter), firstSymbol)
         }
 
         guard !pages.isEmpty else {
@@ -112,7 +124,7 @@ extension SwiftDoc {
             return
         }
 
-        if pages.count == 1, let page = pages.first?.value {
+        if pages.count == 1, let page = pages.first?.value.0 {
           let filename: String
           switch format {
           case .commonmark:
@@ -126,11 +138,11 @@ extension SwiftDoc {
         } else {
           switch format {
           case .commonmark:
-            pages["Home"] = HomePage(module: module, externalTypes: Array(symbolsByExternalType.keys), baseURL: baseURL, symbolFilter: symbolFilter)
-            pages["_Sidebar"] = SidebarPage(module: module, externalTypes: Set(symbolsByExternalType.keys), baseURL: baseURL, symbolFilter: symbolFilter)
-            pages["_Footer"] = FooterPage(baseURL: baseURL)
+            pages["Home"] = (HomePage(module: module, externalTypes: Array(symbolsByExternalType.keys), baseURL: baseURL, symbolFilter: symbolFilter), nil)
+            pages["_Sidebar"] = (SidebarPage(module: module, externalTypes: Set(symbolsByExternalType.keys), baseURL: baseURL, symbolFilter: symbolFilter), nil)
+            pages["_Footer"] = (FooterPage(baseURL: baseURL), nil)
           case .html:
-            pages["Home"] = HomePage(module: module, externalTypes: Array(symbolsByExternalType.keys), baseURL: baseURL, symbolFilter: symbolFilter)
+            pages["Home"] = (HomePage(module: module, externalTypes: Array(symbolsByExternalType.keys), baseURL: baseURL, symbolFilter: symbolFilter), nil)
           }
 
           try pages.map { $0 }.parallelForEach {
@@ -144,8 +156,18 @@ extension SwiftDoc {
               filename = "\(path(for: $0.key))/index.html"
             }
 
-            let url = outputDirectoryURL.appendingPathComponent(filename)
-            try $0.value.write(to: url, format: format)
+            if let symbol = $0.value.1 {
+                let path1 = URL(fileURLWithPath: String(symbol.filePath.dropFirst("file://".count)))
+                let path2 = path1.deletingLastPathComponent().appendingPathComponent(filename)
+                let path3 = String(path2.absoluteString.dropFirst(startDirectory.absoluteString.count))
+                //print("SYMBOL filePath \(symbol.filePath)")
+                //print("SYMBOL URL \(path1.absoluteString)")
+                //print("SYMBOL RELATIVE URL \(path3)")
+                try $0.value.0.write(to: outputDirectoryURL.appendingPathComponent(path3), format: format)
+            } else {
+                let url = outputDirectoryURL.appendingPathComponent(filename)
+                try $0.value.0.write(to: url, format: format)
+            }
           }
         }
 
@@ -160,4 +182,10 @@ extension SwiftDoc {
       }
     }
   }
+}
+
+extension Symbol {
+    var fileURL: URL {
+        URL(fileURLWithPath: filePath)
+    }
 }

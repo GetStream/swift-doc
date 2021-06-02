@@ -31,6 +31,7 @@ extension Page {
 
         guard let filedata = data else { return }
 
+        //print("WRITING \(url.lastPathComponent) to \(url.absoluteString)")
         try writeFile(filedata, to: url)
     }
 }

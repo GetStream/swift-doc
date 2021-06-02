@@ -57,13 +57,13 @@ public struct SourceFile: Hashable, Codable {
             guard let api = Declaration(node) else { return nil }
             guard let documentation = try? Documentation.parse(node.documentation) else { return nil }
             let sourceRange = node.sourceRange(using: sourceLocationConverter)
-            return Symbol(api: api, context: context, declaration: declaration(for: node), documentation: documentation, sourceRange: sourceRange)
+            return Symbol(api: api, context: context, declaration: declaration(for: node), documentation: documentation, sourceRange: sourceRange, path: fileURL.absoluteString)
         }
 
         func symbol<Node: SymbolDeclProtocol>(_ node: Node, api: API) -> Symbol? {
             guard let documentation = try? Documentation.parse(node.documentation) else { return nil }
             let sourceRange = node.sourceRange(using: sourceLocationConverter)
-            return Symbol(api: api, context: context, declaration: declaration(for: node), documentation: documentation, sourceRange: sourceRange)
+            return Symbol(api: api, context: context, declaration: declaration(for: node), documentation: documentation, sourceRange: sourceRange, path: fileURL.absoluteString)
         }
 
         func declaration<Node: SymbolDeclProtocol>(for node: Node) -> [Token] {

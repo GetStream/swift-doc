@@ -12,6 +12,7 @@ public final class Symbol {
     public let declaration: [Token]
     public let documentation: Documentation?
     public let sourceRange: SourceRange?
+    public let filePath: String
 
     @available(swift, deprecated: 0.0.1, message: "Use sourceRange instead")
     public var sourceLocation: SourceLocation? { sourceRange?.start }
@@ -19,7 +20,7 @@ public final class Symbol {
     public private(set) lazy var `extension`: Extension? = context.compactMap { $0 as? Extension }.first
     public private(set) lazy var conditions: [CompilationCondition] = context.compactMap { $0 as? CompilationCondition }
 
-    init(api: API, context: [Contextual], declaration: [Token], documentation: Documentation?, sourceRange: SourceRange?) {
+    init(api: API, context: [Contextual], declaration: [Token], documentation: Documentation?, sourceRange: SourceRange?, path: String) {
         self.id = Identifier(context: context.compactMap {
             ($0 as? Symbol)?.name ?? ($0 as? Extension)?.extendedType
         }, name: api.name)
@@ -28,6 +29,7 @@ public final class Symbol {
         self.declaration = declaration
         self.documentation = documentation
         self.sourceRange = sourceRange
+        self.filePath = path
     }
 
     public var name: String {
@@ -240,6 +242,7 @@ extension Symbol: Codable {
         case declaration
         case documentation
         case sourceRange
+        case filePath
 
         case associatedType
         case `case`
@@ -297,8 +300,9 @@ extension Symbol: Codable {
         let declaration = try container.decodeIfPresent([Token].self, forKey: .declaration)
         let documentation = try container.decodeIfPresent(Documentation.self, forKey: .documentation)
         let sourceRange = try container.decodeIfPresent(SourceRange.self, forKey: .sourceRange)
+        let path = try container.decode(String.self, forKey: .filePath)
 
-        self.init(api: api, context: [] /* TODO */, declaration: declaration ?? [], documentation: documentation, sourceRange: sourceRange)
+        self.init(api: api, context: [] /* TODO */, declaration: declaration ?? [], documentation: documentation, sourceRange: sourceRange, path: path)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -338,6 +342,7 @@ extension Symbol: Codable {
 
         try container.encode(documentation, forKey: .documentation)
         try container.encode(sourceRange, forKey: .sourceRange)
+        try container.encode(filePath, forKey: .filePath)
     }
 }
 
