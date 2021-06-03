@@ -106,13 +106,13 @@ extension SwiftDoc {
         }
         for (typeName, symbols) in symbolsByExternalType {
             let firstSymbol = symbols.first!
-            //print("EXTERNAL TYPE \(typeName), SYMBOL COUNT \(symbols.count), FIRST SYMBOL PATH \(firstSymbol.filePath)")
+            //"EXTERNAL TYPE \(typeName), SYMBOL COUNT \(symbols.count), FIRST SYMBOL PATH \(firstSymbol.filePath)")
             pages[route(for: typeName)] = (ExternalTypePage(module: module, externalType: typeName, symbols: symbols, baseURL: baseURL, includingOtherSymbols: symbolFilter), firstSymbol)
         }
 
         for (name, symbols) in globals {
             let firstSymbol = symbols.first!
-            //print("GLOBAL PAGE \(name), SYMBOL COUNT \(symbols.count), FIRST SYMBOL PATH \(firstSymbol.filePath)")
+           // print("GLOBAL PAGE \(name), SYMBOL COUNT \(symbols.count), FIRST SYMBOL PATH \(firstSymbol.filePath)")
             pages[route(for: name)] = (GlobalPage(module: module, name: name, symbols: symbols, baseURL: baseURL, includingOtherSymbols: symbolFilter), firstSymbol)
         }
 
@@ -160,9 +160,9 @@ extension SwiftDoc {
                 let path1 = URL(fileURLWithPath: String(symbol.filePath.dropFirst("file://".count)))
                 let path2 = path1.deletingLastPathComponent().appendingPathComponent(filename)
                 let path3 = String(path2.absoluteString.dropFirst(startDirectory.absoluteString.count))
-                //print("SYMBOL filePath \(symbol.filePath)")
-                //print("SYMBOL URL \(path1.absoluteString)")
-                //print("SYMBOL RELATIVE URL \(path3)")
+              //  print("SYMBOL filePath \(symbol.filePath)")
+              //  print("SYMBOL URL \(path1.absoluteString)")
+              //  print("SYMBOL RELATIVE URL \(path3)")
                 try $0.value.0.write(to: outputDirectoryURL.appendingPathComponent(path3), format: format)
             } else {
                 let url = outputDirectoryURL.appendingPathComponent(filename)

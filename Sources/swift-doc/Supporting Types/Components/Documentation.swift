@@ -25,6 +25,7 @@ struct Documentation: Component {
     var fragment: Fragment {
         guard let documentation = symbol.documentation else { return Fragment { "" } }
 
+        print("DEBUGYOLO: There is nice baseURL: \(baseURL) in symbol: \(self.symbol)")
         return Fragment {
             if !symbol.conditions.isEmpty {
                 Fragment {

@@ -19,7 +19,20 @@ public func path(for identifier: CustomStringConvertible, with baseURL: String) 
     guard let string = url?.absoluteString else {
         fatalError("Unable to construct path for \(identifier) with baseURL \(baseURL)")
     }
+    // Let's for convenience remove underscores from all types except the ones we need:
+    let omittedTypesWithUnderscore = [
+        "_Button",
+        "_View", 
+        "_Control",
+        "_CollectionReusableView", 
+        "_CollectionViewCell",
+        "_NavigationBar",
+        "_ViewController"
+    ]
 
+    if !omittedTypesWithUnderscore.contains(where: string.contains) {
+        return string.replacingOccurrences(of: "_", with: "")
+    }
     return string
 }
 
