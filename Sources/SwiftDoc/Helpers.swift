@@ -5,8 +5,7 @@ public func route(for symbol: Symbol) -> String {
 }
 
 public func route(for name: CustomStringConvertible) -> String {
-    return name.description.replacingOccurrences(of: ".", with: "_")
-                           .replacingOccurrences(of: " ", with: "-")
+    return name.description.replacingOccurrences(of: " ", with: "-")
 }
 
 public func path(for symbol: Symbol, with baseURL: String) -> String {
