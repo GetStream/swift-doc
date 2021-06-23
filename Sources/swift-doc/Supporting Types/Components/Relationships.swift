@@ -88,7 +88,7 @@ struct Relationships: Component {
                         } else {
                             let absoluteTypePath = URL(fileURLWithPath: String(type.filePath.dropFirst("file://".count))).deletingLastPathComponent()
                             let relativePathToInheritedClass = absoluteTypePath.relativePath(from: URL(fileURLWithPath: symbol.filePath).deletingLastPathComponent())!
-                    return "[`\(type.id)`](\(path(for: type, with: relativePathToInheritedClass).camelCaseToKebabCase()))"
+                    return "[`\(type.id)`](../\(path(for: type, with: relativePathToInheritedClass).camelCaseToKebabCase()))"
                         }
                     }.joined(separator: ", "))
                     """#
