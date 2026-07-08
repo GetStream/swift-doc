@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: 0 0 * * *
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   homebrew-bottle:
     runs-on: macos-10.15
