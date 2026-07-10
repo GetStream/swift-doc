@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: .build
           key: ${{ runner.os }}-spm-xcode-${{ matrix.xcode }}-${{ hashFiles('**/Package.resolved') }}
@@ -53,7 +53,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: .build
           key: ${{ runner.os }}-spm-xcode-${{ matrix.xcode }}-${{ hashFiles('**/Package.resolved') }}
@@ -83,7 +83,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: .build
           key: ${{ runner.os }}-spm-swift-${{ matrix.swift }}-${{ hashFiles('**/Package.resolved') }}
@@ -153,7 +153,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('.node/**/package-lock.json') }}
