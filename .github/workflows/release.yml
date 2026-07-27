@@ -5,6 +5,9 @@ on:
     tags:
       - "*.*.*"
 
+permissions:
+  contents: read
+
 jobs:
   release:
     name: Create a release on GitHub

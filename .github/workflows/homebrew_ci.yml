@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: 0 0 * * *
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   homebrew-bottle:
     runs-on: macos-10.15
@@ -13,7 +17,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: .build
           key: ${{ runner.os }}-spm-xcode-${{ matrix.xcode }}-${{ hashFiles('**/Package.resolved') }}
@@ -32,7 +36,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: .build
           key: ${{ runner.os }}-spm-xcode-${{ hashFiles('**/Package.resolved') }}

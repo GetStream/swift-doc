@@ -8,6 +8,9 @@ on:
       - .github/workflows/documentation.yml
       - Sources/SwiftDoc/**.swift
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
